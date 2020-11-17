@@ -1,8 +1,8 @@
 import numpy as np
 import cv2
 
-camera = cv2.VideoCapture("parking_test3.mp4")
-camera.open("parking_test3.mp4")
+camera = cv2.VideoCapture("parking_test4.mp4")
+camera.open("parking_test4.mp4")
 
 
 
