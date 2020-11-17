@@ -16,6 +16,11 @@ while True:
     #showing grayScale video
     cv2.imshow('GrayFilter', grayFilter)
 
+    #cannyEdge detector
+    cannyFilter = cv2.Canny(grayFilter, 100, 200)
+
+    #showing cannyEdge video
+    cv2.imshow('CannyFilter', cannyFilter)
     #define exit program key (q)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
