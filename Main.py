@@ -4,8 +4,21 @@ import cv2
 camera = cv2.VideoCapture("parking_test.mp4")
 camera.open("parking_test.mp4")
 
+
+
+
+
 while True:
     ret, frame = camera.read()
+
+    #autocanny
+    sigma = 0.3
+    median = np.median(frame)
+    lowerThreshold = int(max(0, (1.0 - sigma) * median))
+    upperThreshold = int(min(255,(1.0 + sigma)*median))
+
+    autocanny = cv2.Canny(frame, lowerThreshold,upperThreshold)
+    cv2.imshow('Autocanny', autocanny)
 
     #showing original video
     cv2.imshow('CameraFeed',frame)
@@ -21,6 +34,7 @@ while True:
 
     #showing cannyEdge video
     cv2.imshow('CannyFilter', cannyFilter)
+
     #define exit program key (q)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
