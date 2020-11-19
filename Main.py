@@ -28,7 +28,10 @@ while True:
     # binary image
     _, threshold = cv2.threshold(autocanny, 80, 255, cv2.THRESH_BINARY)
 
-
+    # trying contour searching
+    contours, hierarchy = cv2.findContours(threshold,cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+    print("Number of countrs= " + str(len(contours)))
+    cv2.drawContours(frame, contours, -1, (0,255,0), 1)
 
 
     #showing original video
