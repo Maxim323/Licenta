@@ -28,12 +28,14 @@ while True:
     # binary image
     _, threshold = cv2.threshold(autocanny, 80, 255, cv2.THRESH_BINARY)
 
-
+    firstlot = image = cv2.rectangle(frame, (255, 396), (309, 423), (0, 89, 192), 5)
 
 
     #showing original video
     cv2.imshow('CameraFeed',frame)
-    cv2.imshow("BinaryFilter", threshold)
+   #  cv2.imshow("BinaryFilter", threshold+ firstlot)
+    cv2.imshow("Lots",  firstlot)
+
     #showing grayScale video
     #cv2.imshow('GrayFilter', grayFilter)
 
