@@ -29,14 +29,35 @@ while True:
     _, threshold = cv2.threshold(autocanny, 80, 255, cv2.THRESH_BINARY)
 
     # trying contour searching
-    contours, hierarchy = cv2.findContours(threshold,cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
-    print("Number of countrs= " + str(len(contours)))
-    cv2.drawContours(frame, contours, -1, (0,255,0), 1)
+    # contours, hierarchy = cv2.findContours(threshold,cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+    # print("Number of countrs= " + str(len(contours)))
+    #cv2.drawContours(frame, contours, -1, (0,255,0), 1)
+
+    #drawing the spots
+    Lot1 = cv2.circle(frame,(195,386),10,(0, 0, 255),1,)
+    Lot2 = cv2.circle(frame,(239,385),10,(0,0,225),1)
+    Lot3 = cv2.circle(frame, (263, 365), 10, (0, 0, 225), 1)
+    Lot4 = cv2.circle(frame, (239, 385), 10, (0, 0, 225), 1)
+    Lot5 = cv2.circle(frame, (298, 353), 10, (0, 0, 225), 1)
+    Lot6 = cv2.circle(frame, (325, 339), 10, (0, 0, 225), 1)
+    Lot7 = cv2.circle(frame, (356, 328), 10, (0, 0, 225), 1)
+    Lot8 = cv2.circle(frame, (385, 314), 10, (0, 0, 225), 1)
+    Lot9 = cv2.circle(frame, (403, 303), 10, (0, 0, 225), 1)
+    Lot10 = cv2.circle(frame, (438, 294), 10, (0, 0, 225), 1)
+    Lot11 = cv2.circle(frame, (468, 279), 10, (0, 0, 225), 1)
+
+    for contour in Lot1:
+        contours = cv2.findContours(Lot1, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+        cv2.imshow(contours)
+
+        if cv2.contourArea(contours) < 100:
+            continue
+            cv2.putText(frame, "Status")
 
 
     #showing original video
-    cv2.imshow('CameraFeed',frame)
-    cv2.imshow("BinaryFilter", threshold)
+    #cv2.imshow('CameraFeed',frame)
+    #cv2.imshow("BinaryFilter", threshold)
     #showing grayScale video
     #cv2.imshow('GrayFilter', grayFilter)
 
