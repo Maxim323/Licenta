@@ -1,8 +1,8 @@
 import numpy as np
 import cv2
 
-camera = cv2.VideoCapture("parking_test5.mp4")
-camera.open("parking_test5.mp4")
+camera = cv2.VideoCapture("parking_test6.mp4")
+
 
 
 while True:
@@ -10,10 +10,17 @@ while True:
 
     grayFilter = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
+    cv2.imshow("Original Video", frame)
+
+    #splitting the big frame in certain small frames to be analized
+
+
+
+
  #incercare detectare diferenta de nr conture
     frame2 = grayFilter[272:321,366:466]
     _, threshold2 = cv2.threshold(frame2, 80, 255, cv2.THRESH_BINARY)
-
+q
     cv2.imshow("Frame2", threshold2)
 
     contours, hierarchy= cv2.findContours(threshold2, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
