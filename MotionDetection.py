@@ -1,30 +1,40 @@
 import numpy as np
 import cv2
 
-camera = cv2.VideoCapture("parking_test5.mp4")
-camera.open("parking_test5.mp4")
-
+camera = cv2.VideoCapture("parking_test6.mp4")
 
 
 
 while True:
     ret, frame = camera.read()
 
-    # drawing the spots
-    Lot1 = cv2.circle(frame, (195, 386), 10, (0, 0, 255), 1, )
-    Lot2 = cv2.circle(frame, (239, 385), 10, (0, 0, 225), 1)
-    Lot3 = cv2.circle(frame, (263, 365), 10, (0, 0, 225), 1)
-    Lot4 = cv2.circle(frame, (239, 385), 10, (0, 0, 225), 1)
-    Lot5 = cv2.circle(frame, (298, 353), 10, (0, 0, 225), 1)
-    Lot6 = cv2.circle(frame, (325, 339), 10, (0, 0, 225), 1)
-    Lot7 = cv2.circle(frame, (356, 328), 10, (0, 0, 225), 1)
-    Lot8 = cv2.circle(frame, (385, 314), 10, (0, 0, 225), 1)
-    Lot9 = cv2.circle(frame, (403, 303), 10, (0, 0, 225), 1)
-    Lot10 = cv2.circle(frame, (438, 294), 10, (0, 0, 225), 1)
-    Lot11 = cv2.circle(frame, (468, 279), 10, (0, 0, 225), 1)
+    grayFilter = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-    cv2.imshow("Frame", frame)
-    
+    cv2.imshow("Original Video", frame)
+
+    #splitting the big frame in certain small frames to be analized
+
+
+
+
+ #incercare detectare diferenta de nr conture
+    frame2 = grayFilter[272:321,366:466]
+    _, threshold2 = cv2.threshold(frame2, 80, 255, cv2.THRESH_BINARY)
+q
+    cv2.imshow("Frame2", threshold2)
+
+    contours, hierarchy= cv2.findContours(threshold2, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    for cnt in contours:
+        (x,y,w,h) = cv2.boundingRect(cnt)
+
+        area = cv2.contourArea(cnt)
+        if area < 4752:
+            print("Loc ocupat!")
+            cv2.rectangle(threshold2,(x,y),(x+w, y+h),(0,0,255),2)
+        elif area >= 4752:
+            print("Loc liber")
+            cv2.rectangle(threshold2, (x, y), (x + w, y + h), (0, 0, 255), 2)
+
 
 
     #define exit program key (q)
