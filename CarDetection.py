@@ -105,6 +105,7 @@ while True:
             cv2.putText(frame, 'P8', (727, 449), cv2.FONT_HERSHEY_SIMPLEX, 1, (34, 139, 34), 2, cv2.LINE_4)
 
     cv2.imshow("OriginalVideo", frame)
+    #cv2.imshow("Contur", threshold2)
 
     print("P1:", stsP1 + " P2:", stsP2 + " P3:", stsP3 + " P4:", stsP4 + " P5:", stsP5 + " P6:", stsP6 + " P7:",
           stsP7 + " P8:", stsP8)
