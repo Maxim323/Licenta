@@ -61,9 +61,12 @@ while True:
             firstFrame = False
             break
 
-    for i,j in zip(ParkingSpaces, DetectionLots):
-        DetectionLots[i] = frame[ParkingSpaces[i][1]:ParkingSpaces[i][3],ParkingSpaces[i][0]:ParkingSpaces[i][2]]
-        cv2.imshow("Test",DetectionLots[j])
+    # for i,j in zip(ParkingSpaces, DetectionLots):
+    #     DetectionLots[i] = frame[ParkingSpaces[i][1]:ParkingSpaces[i][3],ParkingSpaces[i][0]:ParkingSpaces[i][2]]
+    #     cv2.imshow("Test",DetectionLots[j])
+    DetectionLots[1] = frame[ParkingSpaces[1][1]:ParkingSpaces[1][3], ParkingSpaces[1][0]:ParkingSpaces[1][2]]
+    print(DetectionLots[1])
+    cv2.imshow("Test", DetectionLots[1])
 
     cv2.imshow('myName', frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
