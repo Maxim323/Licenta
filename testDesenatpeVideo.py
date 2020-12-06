@@ -1,4 +1,6 @@
 import cv2
+import itertools
+
 ParkingSpaces = []
 # initial points (before drawing) & other variables
 pt1 = (0, 0)
@@ -6,6 +8,7 @@ pt2 = (0, 0)
 topLeft_clicked = False
 bottomRight_clicked = False
 firstFrame = True
+DetectionLots = ['Lot1','Lot2','Lot3','Lot4','Lot5','Lot6','Lot7', 'Lot8']
 
 
 #mouse callback function#
@@ -32,7 +35,7 @@ def draw_rectangle(event, x, y, flags, param):
 
             if firstFrame is True:
                 ParkingSpaces.append(pt1 + pt2)
-                print(ParkingSpaces)
+                DetectionLots.append(ParkingSpaces)
 
 
 #capture video
@@ -58,7 +61,9 @@ while True:
             firstFrame = False
             break
 
-    #for i in len(ParkingSpaces):
+    for i,j in zip(ParkingSpaces, DetectionLots):
+        DetectionLots[i] = frame[ParkingSpaces[i][1]:ParkingSpaces[i][3],ParkingSpaces[i][0]:ParkingSpaces[i][2]]
+        cv2.imshow("Test",DetectionLots[j])
 
     cv2.imshow('myName', frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
