@@ -1,5 +1,5 @@
 import cv2
-import itertools
+
 import numpy as np
 
 ParkingSpaces = []
