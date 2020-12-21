@@ -90,7 +90,7 @@ while True:
     for i in range(len(ParkingSpaces)):
         for cnt[i] in contours[i]:
             area[i] = cv2.contourArea(cnt[i])
-            if area[i] > 1:
+            if area[i] > 10:
                 sts[i] = "OCUPAT"
             else:
                 sts[i] = "LIBER"
