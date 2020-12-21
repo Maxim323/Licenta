@@ -1,5 +1,6 @@
 import cv2
 import itertools
+import numpy as np
 
 ParkingSpaces = []
 # initial points (before drawing) & other variables
@@ -8,7 +9,12 @@ pt2 = (0, 0)
 topLeft_clicked = False
 bottomRight_clicked = False
 firstFrame = True
-DetectionLots = ['Lot1','Lot2','Lot3','Lot4','Lot5','Lot6','Lot7', 'Lot8']
+Lot = ['']*10
+contours = ['']*10
+hierarchy = ['']*10
+area= ['']*10
+sts=['']*10
+cnt=['']*10
 
 
 #mouse callback function#
@@ -35,38 +41,62 @@ def draw_rectangle(event, x, y, flags, param):
 
             if firstFrame is True:
                 ParkingSpaces.append(pt1 + pt2)
-                DetectionLots.append(ParkingSpaces)
+
+                #printare dreptunghiurile desenate pe video
+                print(ParkingSpaces)
+
 
 
 #capture video
-cap = cv2.VideoCapture('parking_test6.mp4')
-
-
+cap = cv2.VideoCapture('parking_test.mp4')
 
 while True:
     ret, frame = cap.read()
 
+    # procesare imagine
+    grayFilter = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+    # autocanny
+    sigma = 0.3
+    median = np.median(frame)
+    lowerThreshold = int(max(0, (1.0 - sigma) * median))
+    upperThreshold = int(min(255, (1.0 + sigma) * median))
+
+    edge = cv2.Canny(grayFilter, lowerThreshold, upperThreshold)
+
+    _, FinalFrame = cv2.threshold(edge, 80, 255, cv2.THRESH_BINARY)
+
     while firstFrame is True:
-
-
 
         cv2.namedWindow(winname='myName')
         cv2.setMouseCallback('myName', draw_rectangle)
         cv2.imshow('myName', frame)
 
         if topLeft_clicked and bottomRight_clicked:
-            cv2.rectangle(frame, pt1, pt2, (255,0,0), 2)
+            cv2.rectangle(frame, pt1, pt2, (255, 0, 0), 2)
 
-        if cv2.waitKey(1) &0xFF == ord('c'):
+        if cv2.waitKey(1) & 0xFF == ord('c'):
             firstFrame = False
             break
 
-    # for i,j in zip(ParkingSpaces, DetectionLots):
-    #     DetectionLots[i] = frame[ParkingSpaces[i][1]:ParkingSpaces[i][3],ParkingSpaces[i][0]:ParkingSpaces[i][2]]
-    #     cv2.imshow("Test",DetectionLots[j])
-    DetectionLots[1] = frame[ParkingSpaces[1][1]:ParkingSpaces[1][3], ParkingSpaces[1][0]:ParkingSpaces[1][2]]
-    print(DetectionLots[1])
-    cv2.imshow("Test", DetectionLots[1])
+    for i in range(len(ParkingSpaces)):
+        for j in range(len(ParkingSpaces[i])):
+            Lot[i] = FinalFrame[ParkingSpaces[i][1]:ParkingSpaces[i][3], ParkingSpaces[i][0]:ParkingSpaces[i][2]]
+
+
+    for m in range(len(ParkingSpaces)):
+            contours[m], _ = cv2.findContours(Lot[m], cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+
+    for i in range(len(ParkingSpaces)):
+        for cnt[i] in contours[i]:
+            area[i] = cv2.contourArea(cnt[i])
+            if area[i] > 1:
+                sts[i] = "OCUPAT"
+            else:
+                sts[i] = "LIBER"
+    print(sts)
+    print(area)
+
 
     cv2.imshow('myName', frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
