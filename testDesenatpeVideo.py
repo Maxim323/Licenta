@@ -1,5 +1,9 @@
-import cv2
+#selecteaza stream video
+#selecteaza locurile de parcare din primul frame
+#dupa selectare locuri parcare pe care le doresti sa fie monitorizate apasa "c"
+#apasa "q" cand vrei sa inchizi programul
 
+import cv2
 import numpy as np
 
 ParkingSpaces = []
