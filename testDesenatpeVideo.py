@@ -5,6 +5,7 @@
 
 import cv2
 import numpy as np
+import PySimpleGUI as sg
 
 ParkingSpaces = []
 # initial points (before drawing) & other variables
@@ -13,15 +14,23 @@ pt2 = (0, 0)
 topLeft_clicked = False
 bottomRight_clicked = False
 firstFrame = True
+
+#stocare fiecare frame selectat
 Lot = ['']*10
 contours = ['']*10
 hierarchy = ['']*10
+
+#nr conture pt fiecare zona selectata
 area= ['']*10
+
+#OCUPAT / LIBER pt fiecare loc de parcare selectat
 sts=['']*10
+
+#conture pentru fiecare loc de parcare selectat
 cnt=['']*10
 
 
-#mouse callback function#
+#mouse callback function - do not mess WITH.
 def draw_rectangle(event, x, y, flags, param):
 
     global pt1, pt2, topLeft_clicked, bottomRight_clicked
@@ -50,15 +59,11 @@ def draw_rectangle(event, x, y, flags, param):
                 print(ParkingSpaces)
 
 
-
 #capture video
 cap = cv2.VideoCapture('testing.mp4')
 
 while True:
     ret, frame = cap.read()
-
-    # procesare imagine
-    grayFilter = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     # autocanny
     sigma = 0.3
@@ -70,8 +75,6 @@ while True:
     dilation = cv2.dilate(frame, kernel, iterations=1)
 
     edge = cv2.Canny(dilation, lowerThreshold, upperThreshold)
-
-
 
     _, FinalFrame = cv2.threshold(edge, 80, 255, cv2.THRESH_BINARY)
 
@@ -99,17 +102,21 @@ while True:
     for i in range(len(ParkingSpaces)):
         for cnt[i] in contours[i]:
             area[i] = cv2.contourArea(cnt[i])
-            if area[i] > 0.5:
+            if area[i] > 1:
                 sts[i] = "OCUPAT"
             else:
                 sts[i] = "LIBER"
     print(sts)
     print(area)
 
-    cv2.imshow('Procesare',FinalFrame )
+    cv2.imshow('Procesare',FinalFrame)
     cv2.imshow('myName', frame)
+
+    #interfata utilizator
+
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
+
 
 cap.release()
 cv2.destroyAllWindows()
