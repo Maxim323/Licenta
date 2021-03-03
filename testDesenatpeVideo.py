@@ -52,7 +52,7 @@ def draw_rectangle(event, x, y, flags, param):
 
 
 #capture video
-cap = cv2.VideoCapture('parking_test.mp4')
+cap = cv2.VideoCapture('testing.mp4')
 
 while True:
     ret, frame = cap.read()
@@ -66,7 +66,12 @@ while True:
     lowerThreshold = int(max(0, (1.0 - sigma) * median))
     upperThreshold = int(min(255, (1.0 + sigma) * median))
 
-    edge = cv2.Canny(grayFilter, lowerThreshold, upperThreshold)
+    kernel = np.ones((5, 5), np.uint8)
+    dilation = cv2.dilate(frame, kernel, iterations=1)
+
+    edge = cv2.Canny(dilation, lowerThreshold, upperThreshold)
+
+
 
     _, FinalFrame = cv2.threshold(edge, 80, 255, cv2.THRESH_BINARY)
 
@@ -94,14 +99,14 @@ while True:
     for i in range(len(ParkingSpaces)):
         for cnt[i] in contours[i]:
             area[i] = cv2.contourArea(cnt[i])
-            if area[i] > 10:
+            if area[i] > 0.5:
                 sts[i] = "OCUPAT"
             else:
                 sts[i] = "LIBER"
     print(sts)
     print(area)
 
-
+    cv2.imshow('Procesare',FinalFrame )
     cv2.imshow('myName', frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break

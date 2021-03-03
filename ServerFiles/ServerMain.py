@@ -8,7 +8,7 @@ hostname = socket.gethostname()
 IPAddr = socket.gethostbyname(hostname)
 
 
-eventlet.monkey_patch() #Fixes socketio message broadcasting from threads
+#eventlet.monkey_patch() #Fixes socketio message broadcasting from threads
 
 app = Flask(__name__)
 app.secret_key = "theCakeIsALie"
