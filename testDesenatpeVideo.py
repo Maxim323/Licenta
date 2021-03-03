@@ -5,7 +5,7 @@
 
 import cv2
 import numpy as np
-import PySimpleGUI as sg
+
 
 ParkingSpaces = []
 # initial points (before drawing) & other variables
