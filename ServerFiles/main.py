@@ -2,9 +2,9 @@
 from flask import Flask, session, render_template, request, redirect, g, url_for, flash, Markup, jsonify, Response
 from flask_socketio import SocketIO, emit, join_room, leave_room # pip install flask-socketio
 import socket
-from threading import Thread, Event
-
-
+import threading
+import time
+from extra import *
 
 hostname = socket.gethostname()
 IPAddr = socket.gethostbyname(hostname)
@@ -12,23 +12,17 @@ IPAddr = socket.gethostbyname(hostname)
 app = Flask(__name__)
 app.secret_key = "theCakeIsALie"
 
-socketio = SocketIO(app)
-
-#random number Generator Thread
-thread = Thread()
-thread_stop_event = Event()
-
-class RandomThread(Thread):
-    def _init_(self):
-        self.delay = 1
-        super(RandomThread, self)._init_()
+socketio = SocketIO(app, async_mode='eventlet')
 
 
+def thread_function(x):
+    while True:
+        time.sleep(1)
+        socketio.emit("randomNumber", {'number': giveMeRandom() }, namespace='/')
 
+x = threading.Thread(target=thread_function, args=(1,))
+x.start()
 
-
-thread = RandomThread()
-thread.start()
 
 @app.route('/')
 def index():
@@ -40,5 +34,9 @@ def streamControl(msg):
     socketio.emit("showAlert", {'data': 'big booty bitches'}, namespace='/') #send an alert back to the server with a custom message
 
 
-if __name__ == '__main__':
-    socketio.run(app, host=IPAddr, port=1234, debug=True)
+try:
+    if __name__ == '__main__':
+        socketio.run(app, host=IPAddr, port=1234, debug=True)
+
+except BaseException as e:        
+        print(e)

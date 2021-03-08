@@ -5,7 +5,7 @@
 
 import cv2
 import numpy as np
-import PySimpleGUI as sg
+from datetime import datetime
 
 ParkingSpaces = []
 # initial points (before drawing) & other variables
@@ -34,7 +34,11 @@ sts=['']*25
 #conture pentru fiecare loc de parcare selectat
 cnt=['']*25
 
+#lista pt stocare valori de pixeli albi pt fiecare loc de paracare individual
 WhitePixels = ['']*25
+
+#ora parcare masina
+ParkedHour = ['']*25
 
 # mouse callback function - do not mess WITH.
 def draw_rectangle(event, x, y, flags, param):
@@ -68,9 +72,13 @@ def draw_rectangle(event, x, y, flags, param):
 # capture video
 cap = cv2.VideoCapture('testing.mp4')
 
+#getting the current time outside main loop
+now = datetime.now()
+current_time = now.strftime("%H:%M:%S")
 
 #main function
 while True:
+
     #stabilire nr max locuri parcare la inceputul programului
     if Start == True:
         demoVar = input("Te rog introdu numarul maxim de locuri de parcare: ")
@@ -126,8 +134,10 @@ while True:
     for i in range(len(ParkingSpaces)):
             if WhitePixels[i] >= 1000:
                 sts[i] = "OCUPAT"
+                ParkedHour[i] = current_time
             else:
                 sts[i] = "LIBER"
+                ParkedHour[i] = 0
 
     BusyParkingSpaces = 0
     for h in range(len(sts)):
@@ -137,10 +147,10 @@ while True:
     FreeParkingSpaces = TotalParkingSpaces - BusyParkingSpaces
 
     #printare detalii - pt dev
-
-    cv2.imshow('Procesare', FinalFrame)
-
-    print('Locuri libere de parcare:',FreeParkingSpaces)
+    #cv2.imshow('Procesare', FinalFrame)
+    #print('Locuri libere de parcare:',FreeParkingSpaces)
+    print(ParkedHour)
+    print(sts)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
