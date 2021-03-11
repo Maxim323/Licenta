@@ -23,6 +23,7 @@ FreeParkingSpaces = 0
 
 # stocare fiecare frame selectat
 Lot = [''] * 25
+NumberingLots = ['']*25
 
 contours = [''] * 25
 hierarchy = [''] * 25
@@ -40,22 +41,29 @@ cnt = [''] * 25
 WhitePixels = [''] * 25
 
 # ora parcare masina
-ParkedHour = [''] * 25
+ParkedHour = ['']*25
 
 
 # SUB NICIO FORMA SA NU AI EXCEL`UL DESCHIS CAND SCRIE IN EL
 # THREAD-UL VA CEVA SI NU VA MAI MERGE
+# creare excel file + adaugare primele valori
+
 def GetData():
     while True:
-
-        # creare excel file + adaugare primele valori
         outWorkbook = xlsxwriter.Workbook("Data.xlsx")
         outSheet = outWorkbook.add_worksheet()
-        outSheet.write("A1", "Status")
-        outSheet.write("A1", WhitePixels[0])
-        outSheet.write("A2", WhitePixels[1])
-        outSheet.write("A3", WhitePixels[2])
-        print("First transfer done")
+
+        # Headers
+        outSheet.write("A1", "Name")
+        outSheet.write("B1", "Status")
+        outSheet.write("C1", "Date&Time")
+
+        for m in range(len(ParkingSpaces)):
+            outSheet.write("A" +str(m + 2), NumberingLots[m])
+            outSheet.write("B"+str(m+2), sts[m])
+            outSheet.write("C"+str(m+2), ParkedHour[m])
+
+        print("Data transfer done")
         outWorkbook.close()
         time.sleep(10)
 
@@ -95,7 +103,9 @@ cap = cv2.VideoCapture('testing.mp4')
 
 # getting the current time outside main loop
 now = datetime.now()
-current_time = now.strftime("%H:%M:%S")
+
+# current time are full data format pt procesare date
+current_time = now.strftime("%m/%d/%Y, %H:%M:%S")
 
 def main():
     global Start, firstFrame
@@ -159,6 +169,12 @@ def main():
             else:
                 sts[i] = "LIBER"
                 ParkedHour[i] = 0
+
+        # cautare pixeli albi in loturile de parcare generate
+        for o in range(len(ParkingSpaces)):
+            NumberingLots[o] = "Lot"+str(o)
+
+
 
         BusyParkingSpaces = 0
         for h in range(len(sts)):
