@@ -6,9 +6,12 @@
 import cv2
 import numpy as np
 from datetime import datetime
+import xlsxwriter
+import time, traceback
+from threading import Thread
 
-ParkingSpaces = []
 # initial points (before drawing) & other variables
+ParkingSpaces = []
 pt1 = (0, 0)
 pt2 = (0, 0)
 topLeft_clicked = False
@@ -18,27 +21,44 @@ Start = True
 BusyParkingSpaces = 0
 FreeParkingSpaces = 0
 
+# stocare fiecare frame selectat
+Lot = [''] * 25
 
-#stocare fiecare frame selectat
-Lot = ['']*25
+contours = [''] * 25
+hierarchy = [''] * 25
 
-contours = ['']*25
-hierarchy = ['']*25
+# nr conture pt fiecare zona selectata
+area = [''] * 25
 
-#nr conture pt fiecare zona selectata
-area= ['']*25
+# OCUPAT / LIBER pt fiecare loc de parcare selectat
+sts = [''] * 25
 
-#OCUPAT / LIBER pt fiecare loc de parcare selectat
-sts=['']*25
+# conture pentru fiecare loc de parcare selectat
+cnt = [''] * 25
 
-#conture pentru fiecare loc de parcare selectat
-cnt=['']*25
+# lista pt stocare valori de pixeli albi pt fiecare loc de paracare individual
+WhitePixels = [''] * 25
 
-#lista pt stocare valori de pixeli albi pt fiecare loc de paracare individual
-WhitePixels = ['']*25
+# ora parcare masina
+ParkedHour = [''] * 25
 
-#ora parcare masina
-ParkedHour = ['']*25
+
+# SUB NICIO FORMA SA NU AI EXCEL`UL DESCHIS CAND SCRIE IN EL
+# THREAD-UL VA CEVA SI NU VA MAI MERGE
+def GetData():
+    while True:
+
+        # creare excel file + adaugare primele valori
+        outWorkbook = xlsxwriter.Workbook("Data.xlsx")
+        outSheet = outWorkbook.add_worksheet()
+        outSheet.write("A1", "Status")
+        outSheet.write("A1", WhitePixels[0])
+        outSheet.write("A2", WhitePixels[1])
+        outSheet.write("A3", WhitePixels[2])
+        print("First transfer done")
+        outWorkbook.close()
+        time.sleep(10)
+
 
 # mouse callback function - do not mess WITH.
 def draw_rectangle(event, x, y, flags, param):
@@ -46,7 +66,7 @@ def draw_rectangle(event, x, y, flags, param):
 
     # mouse click
     if event == cv2.EVENT_LBUTTONDOWN:
-        #reset
+        # reset
         if topLeft_clicked and bottomRight_clicked:
             topLeft_clicked = False
             bottomRight_clicked = False
@@ -66,72 +86,73 @@ def draw_rectangle(event, x, y, flags, param):
             if firstFrame is True:
                 ParkingSpaces.append(pt1 + pt2)
 
-                #printare coordonate dreptunghiurile desenate pe video
+                # printare coordonate dreptunghiurile desenate pe video
                 print(ParkingSpaces)
+
 
 # capture video
 cap = cv2.VideoCapture('testing.mp4')
 
-#getting the current time outside main loop
+# getting the current time outside main loop
 now = datetime.now()
 current_time = now.strftime("%H:%M:%S")
 
-#main function
-while True:
+def main():
+    global Start, firstFrame
+    while True:
 
-    #stabilire nr max locuri parcare la inceputul programului
-    if Start == True:
-        demoVar = input("Te rog introdu numarul maxim de locuri de parcare: ")
-        TotalParkingSpaces = (int)(demoVar)
-        Start = False
+        # stabilire nr max locuri parcare la inceputul programului
+        if Start == True:
+            demoVar = input("Te rog introdu numarul maxim de locuri de parcare: ")
+            TotalParkingSpaces = (int)(demoVar)
+            Start = False
 
-    #citire video input
-    ret, frame = cap.read()
+        # citire video input
+        ret, frame = cap.read()
 
-    #autocanny
-    sigma = 0.3
-    median = np.median(frame)
-    lowerThreshold = int(max(0, (1.0 - sigma) * median))
-    upperThreshold = int(min(255, (1.0 + sigma) * median))
+        # autocanny
+        sigma = 0.3
+        median = np.median(frame)
+        lowerThreshold = int(max(0, (1.0 - sigma) * median))
+        upperThreshold = int(min(255, (1.0 + sigma) * median))
 
-    #creare kernel pt convolutie
-    kernel = np.ones((5, 5), np.uint8)
+        # creare kernel pt convolutie
+        kernel = np.ones((5, 5), np.uint8)
 
-    #operatie de dilatare video cu kernelul creat
-    dilation = cv2.dilate(frame, kernel, iterations=1)
+        # operatie de dilatare video cu kernelul creat
+        dilation = cv2.dilate(frame, kernel, iterations=1)
 
-    #canny cu frame-ul rezultat din dilatare
-    edge = cv2.Canny(dilation, lowerThreshold, upperThreshold)
+        # canny cu frame-ul rezultat din dilatare
+        edge = cv2.Canny(dilation, lowerThreshold, upperThreshold)
 
-    #conversie catre frame binar dupa canny pt accuracy mai mare
-    _, FinalFrame = cv2.threshold(edge, 80, 255, cv2.THRESH_BINARY)
+        # conversie catre frame binar dupa canny pt accuracy mai mare
+        _, FinalFrame = cv2.threshold(edge, 80, 255, cv2.THRESH_BINARY)
 
-    #gasire coordonate locuri de parcare selectate
-    while firstFrame is True:
+        # gasire coordonate locuri de parcare selectate
+        while firstFrame is True:
 
-        cv2.namedWindow(winname='myName')
-        cv2.setMouseCallback('myName', draw_rectangle)
-        cv2.imshow('myName', frame)
+            cv2.namedWindow(winname='myName')
+            cv2.setMouseCallback('myName', draw_rectangle)
+            cv2.imshow('myName', frame)
 
-        if topLeft_clicked and bottomRight_clicked:
-            cv2.rectangle(frame, pt1, pt2, (255, 0, 0), 2)
+            if topLeft_clicked and bottomRight_clicked:
+                cv2.rectangle(frame, pt1, pt2, (255, 0, 0), 2)
 
-        if cv2.waitKey(1) & 0xFF == ord('c'):
-            firstFrame = False
-            break
+            if cv2.waitKey(1) & 0xFF == ord('c'):
+                firstFrame = False
+                break
 
-    #creare frame-uri individuale cu coordinatele gasite mai sus
-    for i in range(len(ParkingSpaces)):
-        for j in range(len(ParkingSpaces[i])):
-            Lot[i] = FinalFrame[ParkingSpaces[i][1]:ParkingSpaces[i][3], ParkingSpaces[i][0]:ParkingSpaces[i][2]]
+        # creare frame-uri individuale cu coordinatele gasite mai sus
+        for i in range(len(ParkingSpaces)):
+            for j in range(len(ParkingSpaces[i])):
+                Lot[i] = FinalFrame[ParkingSpaces[i][1]:ParkingSpaces[i][3], ParkingSpaces[i][0]:ParkingSpaces[i][2]]
 
-    #cautare pixeli albi in loturile de parcare generate
-    for m in range(len(ParkingSpaces)):
-      WhitePixels[m] =cv2.countNonZero(Lot[m])
+        # cautare pixeli albi in loturile de parcare generate
+        for m in range(len(ParkingSpaces)):
+            WhitePixels[m] = cv2.countNonZero(Lot[m])
 
-
-    #stabilire loc ocupat / liber in functie de nr de pixeli albi gasiti
-    for i in range(len(ParkingSpaces)):
+        # stabilire loc ocupat / liber in functie de nr de pixeli albi gasiti
+        for i in range(len(ParkingSpaces)):
             if WhitePixels[i] >= 1000:
                 sts[i] = "OCUPAT"
                 ParkedHour[i] = current_time
@@ -139,23 +160,27 @@ while True:
                 sts[i] = "LIBER"
                 ParkedHour[i] = 0
 
-    BusyParkingSpaces = 0
-    for h in range(len(sts)):
-        if sts[h] == "OCUPAT":
-            BusyParkingSpaces = BusyParkingSpaces + 1
+        BusyParkingSpaces = 0
+        for h in range(len(sts)):
+            if sts[h] == "OCUPAT":
+                BusyParkingSpaces = BusyParkingSpaces + 1
 
-    FreeParkingSpaces = TotalParkingSpaces - BusyParkingSpaces
+        FreeParkingSpaces = TotalParkingSpaces - BusyParkingSpaces
 
-    #printare detalii - pt dev
-    #cv2.imshow('Procesare', FinalFrame)
-    #print('Locuri libere de parcare:',FreeParkingSpaces)
-    print(ParkedHour)
-    print(sts)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+        # printare detalii - pt dev
+        cv2.imshow('Procesare', FinalFrame)
+        # print('Locuri libere de parcare:',FreeParkingSpaces)
 
 
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
 
+    cap.release()
+    cv2.destroyAllWindows()
 
-cap.release()
-cv2.destroyAllWindows()
+# THREADS
+t1 = Thread(target=main)
+t2 = Thread(target=GetData)
+
+t1.start()
+t2.start()
