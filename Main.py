@@ -53,15 +53,10 @@ def GetData():
         outWorkbook = xlsxwriter.Workbook("Data.xlsx")
         outSheet = outWorkbook.add_worksheet()
 
-        # Headers
-        outSheet.write("A1", "Name")
-        outSheet.write("B1", "Status")
-        outSheet.write("C1", "Date&Time")
-
         for m in range(len(ParkingSpaces)):
-            outSheet.write("A" +str(m + 2), NumberingLots[m])
-            outSheet.write("B"+str(m+2), sts[m])
-            outSheet.write("C"+str(m+2), ParkedHour[m])
+            outSheet.write("A" +str(m+1), NumberingLots[m])
+            outSheet.write("B"+str(m+1), sts[m])
+            outSheet.write("C"+str(m+1), ParkedHour[m])
 
         print("Data transfer done")
         outWorkbook.close()
@@ -105,7 +100,7 @@ cap = cv2.VideoCapture('testing.mp4')
 now = datetime.now()
 
 # current time are full data format pt procesare date
-current_time = now.strftime("%m/%d/%Y, %H:%M:%S")
+current_time = now.strftime("%m-%d-%Y %H:%M:%S")
 
 def main():
     global Start, firstFrame
