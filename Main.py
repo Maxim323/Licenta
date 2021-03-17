@@ -18,12 +18,10 @@ topLeft_clicked = False
 bottomRight_clicked = False
 firstFrame = True
 Start = True
-BusyParkingSpaces = 0
-FreeParkingSpaces = 0
 
 # stocare fiecare frame selectat
 Lot = [''] * 25
-NumberingLots = ['']*25
+NumberingLots = [''] * 25
 
 contours = [''] * 25
 hierarchy = [''] * 25
@@ -41,7 +39,7 @@ cnt = [''] * 25
 WhitePixels = [''] * 25
 
 # ora parcare masina
-ParkedHour = ['']*25
+ParkedHour = [''] * 25
 
 
 # SUB NICIO FORMA SA NU AI EXCEL`UL DESCHIS CAND SCRIE IN EL
@@ -53,10 +51,27 @@ def GetData():
         outWorkbook = xlsxwriter.Workbook("Data.xlsx")
         outSheet = outWorkbook.add_worksheet()
 
+        BusyParkingSpaces = 0
+        TrueRange=0
+        for h in range(len(sts)):
+            if sts[h] == "OCUPAT":
+                BusyParkingSpaces = BusyParkingSpaces + 1
+
+        for g in range(len(sts)):
+            if sts[h] == "LIBER" or sts[h] == "OCUPAT":
+                TrueRange = TrueRange + 1
+
+        TotalParkingSpaces = int(len(sts))
+        FreeParkingSpaces = TotalParkingSpaces - BusyParkingSpaces
+
         for m in range(len(ParkingSpaces)):
-            outSheet.write("A" +str(m+1), NumberingLots[m])
-            outSheet.write("B"+str(m+1), sts[m])
-            outSheet.write("C"+str(m+1), ParkedHour[m])
+           outSheet.write("A" + str(m + 1), NumberingLots[m])
+           outSheet.write("B" + str(m + 1), sts[m])
+           outSheet.write("C" + str(m + 1), ParkedHour[m])
+           outSheet.write("D" + str(m + 1), BusyParkingSpaces)
+           outSheet.write("E" + str(m + 1), FreeParkingSpaces)
+
+
 
         print("Data transfer done")
         outWorkbook.close()
@@ -102,15 +117,16 @@ now = datetime.now()
 # current time are full data format pt procesare date
 current_time = now.strftime("%m-%d-%Y %H:%M:%S")
 
+
 def main():
     global Start, firstFrame
     while True:
 
         # stabilire nr max locuri parcare la inceputul programului
-        if Start == True:
-            demoVar = input("Te rog introdu numarul maxim de locuri de parcare: ")
-            TotalParkingSpaces = (int)(demoVar)
-            Start = False
+        # if Start == True:
+        # demoVar = input("Te rog introdu numarul maxim de locuri de parcare: ")
+        # TotalParkingSpaces = (int)(demoVar)
+        #  Start = False
 
         # citire video input
         ret, frame = cap.read()
@@ -167,27 +183,18 @@ def main():
 
         # cautare pixeli albi in loturile de parcare generate
         for o in range(len(ParkingSpaces)):
-            NumberingLots[o] = "Lot"+str(o)
-
-
-
-        BusyParkingSpaces = 0
-        for h in range(len(sts)):
-            if sts[h] == "OCUPAT":
-                BusyParkingSpaces = BusyParkingSpaces + 1
-
-        FreeParkingSpaces = TotalParkingSpaces - BusyParkingSpaces
+            NumberingLots[o] = "Lot" + str(o)
 
         # printare detalii - pt dev
         cv2.imshow('Procesare', FinalFrame)
         # print('Locuri libere de parcare:',FreeParkingSpaces)
-
-
+        print(sts)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
     cap.release()
     cv2.destroyAllWindows()
+
 
 # THREADS
 t1 = Thread(target=main)
