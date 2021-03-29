@@ -6,9 +6,10 @@
 import cv2
 import numpy as np
 from datetime import datetime
-import xlsxwriter
-import time, traceback
+import time
 from threading import Thread
+from openpyxl import Workbook
+from openpyxl.worksheet.table import Table, TableStyleInfo
 
 # initial points (before drawing) & other variables
 ParkingSpaces = []
@@ -48,11 +49,8 @@ ParkedHour = [''] * 25
 
 def GetData():
     while True:
-        outWorkbook = xlsxwriter.Workbook("Data.xlsx")
-        outSheet = outWorkbook.add_worksheet()
-
         BusyParkingSpaces = 0
-        TrueRange=0
+        TrueRange = 0
         for h in range(len(sts)):
             if sts[h] == "OCUPAT":
                 BusyParkingSpaces = BusyParkingSpaces + 1
@@ -64,17 +62,46 @@ def GetData():
         TotalParkingSpaces = int(len(sts))
         FreeParkingSpaces = TotalParkingSpaces - BusyParkingSpaces
 
+        # reading excel data file
+        workbook = Workbook()
+        sheet = workbook.active
+
+        # creating hearders
+        headers = ["Lot", "Status", "Date&Time", "BusySpaces", "FreeSpaces"]
+
         for m in range(len(ParkingSpaces)):
-           outSheet.write("A" + str(m + 1), NumberingLots[m])
-           outSheet.write("B" + str(m + 1), sts[m])
-           outSheet.write("C" + str(m + 1), ParkedHour[m])
-           outSheet.write("D" + str(m + 1), BusyParkingSpaces)
-           outSheet.write("E" + str(m + 1), FreeParkingSpaces)
+            # headers
+            sheet["A1"] = headers[0]
+            sheet["B1"] = headers[1]
+            sheet["C1"] = headers[2]
+            sheet["D1"] = headers[3]
+            sheet["E1"] = headers[4]
 
+            # data
+            sheet["A" + str(m + 2)] = NumberingLots[m]
+            sheet["B" + str(m + 2)] = sts[m]
+            sheet["C" + str(m + 2)] = ParkedHour[m]
+            sheet["D" + str(m + 2)] = BusyParkingSpaces
+            sheet["E" + str(m + 2)] = FreeParkingSpaces
 
+        # creating a table
+        tab = Table(displayName="Table1", ref="A1:E" + str(len(ParkingSpaces) + 1))
 
+        # defining tabler style
+        style = TableStyleInfo(name="TableStyleMedium9", showFirstColumn=False,
+                               showLastColumn=False, showRowStripes=True, showColumnStripes=True)
+
+        # apply style
+        tab.tableStyleInfo = style
+
+        # adaugare table la sheet
+        sheet.add_table(tab)
+
+        # salvare fisier
+        workbook.save(filename="Data.xlsx")
+
+        # printare tranfer cu succes
         print("Data transfer done")
-        outWorkbook.close()
         time.sleep(10)
 
 
