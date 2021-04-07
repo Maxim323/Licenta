@@ -49,8 +49,10 @@ ParkedHour = [''] * 25
 
 def GetData():
     while True:
+
         BusyParkingSpaces = 0
         TrueRange = 0
+
         for h in range(len(sts)):
             if sts[h] == "OCUPAT":
                 BusyParkingSpaces = BusyParkingSpaces + 1
@@ -65,7 +67,7 @@ def GetData():
         # reading excel data file
         workbook = Workbook()
         sheet = workbook.active
-
+        sheet.title = "Data"
         # creating hearders
         headers = ["Lot", "Status", "Date&Time", "BusySpaces", "FreeSpaces"]
 
@@ -102,7 +104,12 @@ def GetData():
 
         # printare tranfer cu succes
         print("Data transfer done")
+
+        #scriere in fisier odata la 10sec
         time.sleep(10)
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+         break
 
 
 # mouse callback function - do not mess WITH.
@@ -136,7 +143,11 @@ def draw_rectangle(event, x, y, flags, param):
 
 
 # capture video
-cap = cv2.VideoCapture('testing.mp4')
+#cooomands to connect to the live camera
+# https://tutos-sphinx-test.readthedocs.io/en/latest/source/rpi/video/video-streaming-vlc.html
+# cap = cv2.VideoCapture("http://192.168.0.114:8160")
+
+cap = cv2.VideoCapture("testing.mp4")
 
 # getting the current time outside main loop
 now = datetime.now()
@@ -215,9 +226,12 @@ def main():
         # printare detalii - pt dev
         cv2.imshow('Procesare', FinalFrame)
         # print('Locuri libere de parcare:',FreeParkingSpaces)
-        print(sts)
+        # print(sts)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
+
+
+        print(WhitePixels)
 
     cap.release()
     cv2.destroyAllWindows()
@@ -229,3 +243,4 @@ t2 = Thread(target=GetData)
 
 t1.start()
 t2.start()
+
