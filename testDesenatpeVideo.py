@@ -1,14 +1,118 @@
-
 import cv2
-import time
 import numpy as np
+from datetime import datetime
+import time
+from threading import Thread
+from openpyxl import Workbook
+from openpyxl.worksheet.table import Table, TableStyleInfo
+
+
+# initial points (before drawing) & other variables
+ParkingSpaces = []
+pt1 = (0, 0)
+pt2 = (0, 0)
+topLeft_clicked = False
+bottomRight_clicked = False
+firstFrame = True
+Start = True
+
+# stocare fiecare frame selectat
+Lot = [''] * 25
+NumberingLots = [''] * 25
+
+contours = [''] * 25
+hierarchy = [''] * 25
+
+# nr conture pt fiecare zona selectata
+area = [''] * 25
+
+# OCUPAT / LIBER pt fiecare loc de parcare selectat
+sts = [''] * 25
+
+# conture pentru fiecare loc de parcare selectat
+cnt = [''] * 25
+
+# lista pt stocare valori de pixeli albi pt fiecare loc de paracare individual
+WhitePixels = [''] * 25
+
+# ora parcare masina
+ParkedHour = [''] * 25
+
 tpPointsChoose = []
 drawing = False
 tempFlag = False
-Points = []
+
 firstFrame = True
 Lot = [''] * 25
 ParkingSpaces = []
+Points = []
+
+def GetData():
+    while True:
+
+        BusyParkingSpaces = 0
+        TrueRange = 0
+
+        for h in range(len(sts)):
+            if sts[h] == "OCUPAT":
+                BusyParkingSpaces = BusyParkingSpaces + 1
+
+        for g in range(len(sts)):
+            if sts[h] == "LIBER" or sts[h] == "OCUPAT":
+                TrueRange = TrueRange + 1
+
+        TotalParkingSpaces = int(len(sts))
+        FreeParkingSpaces = TotalParkingSpaces - BusyParkingSpaces
+
+        # reading excel data file
+        workbook = Workbook()
+        sheet = workbook.active
+        sheet.title = "Data"
+        # creating hearders
+        headers = ["Lot", "Status", "Date&Time", "BusySpaces", "FreeSpaces"]
+
+        for m in range(len(ParkingSpaces)):
+            # headers
+            sheet["A1"] = headers[0]
+            sheet["B1"] = headers[1]
+            sheet["C1"] = headers[2]
+            sheet["D1"] = headers[3]
+            sheet["E1"] = headers[4]
+
+            # data
+            sheet["A" + str(m + 2)] = NumberingLots[m]
+            sheet["B" + str(m + 2)] = sts[m]
+            sheet["C" + str(m + 2)] = ParkedHour[m]
+            sheet["D" + str(m + 2)] = BusyParkingSpaces
+            sheet["E" + str(m + 2)] = FreeParkingSpaces
+
+        # creating a table
+        tab = Table(displayName="Table1", ref="A1:E" + str(len(ParkingSpaces) + 1))
+
+        # defining tabler style
+        style = TableStyleInfo(name="TableStyleMedium9", showFirstColumn=False,
+                               showLastColumn=False, showRowStripes=True, showColumnStripes=True)
+
+        # apply style
+        tab.tableStyleInfo = style
+
+        # adaugare table la sheet
+        sheet.add_table(tab)
+
+        # salvare fisier
+        workbook.save(filename="Data.xlsx")
+
+        # printare tranfer cu succes
+        print("Data transfer done")
+
+        #scriere in fisier odata la 10sec
+        time.sleep(10)
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+         break
+
+
+
 def draw_ROI(event, x, y, flags, param):
     global point1, tpPointsChoose,pts,drawing, tempFlag, Points
 
@@ -35,6 +139,14 @@ def draw_ROI(event, x, y, flags, param):
         tempFlag = False
         drawing = True
         tpPointsChoose = []
+
+
+# getting the current time outside main loop
+now = datetime.now()
+
+# current time are full data format pt procesare date
+current_time = now.strftime("%m-%d-%Y %H:%M:%S")
+
 
 #detalii ititializare click event + fisier
 cv2.namedWindow('Selectare locuri parcare')
@@ -74,7 +186,7 @@ while True:
         if (tempFlag == False and drawing == True):
             for i in range(len(tpPointsChoose) - 1):
                 cv2.line(frame, tpPointsChoose[i], tpPointsChoose[i + 1], (0, 0, 255), 2)
-                Points = []
+
 
 
         if cv2.waitKey(1) & 0xFF == ord('c'):
@@ -82,11 +194,20 @@ while True:
             cv2.destroyWindow('Selectare locuri parcare')
             break
 
-    cv2.imshow('CAMERA LIVE PARCARE', frame)
-    # creare frame-uri individuale cu coordinatele gasite mai sus
-    for m in range(len(ParkingSpaces)):
-        for j in range(len(ParkingSpaces[i])):
-            Lot[i] = frame[ParkingSpaces[i][1]:ParkingSpaces[i][3], ParkingSpaces[i][0]:ParkingSpaces[i][2]]
+    #filtru aplicat cu succes - iterativ
+    for i in range(len(Points)):
+        mask = np.zeros(frame.shape, dtype=np.uint8)
+        roi_corners = np.array([Points[i]], dtype=np.int32)
+        white = (255, 255, 255)
+        cv2.fillPoly(mask, roi_corners, white)
+        Lot[i] = cv2.bitwise_and(frame, mask)
+
+    #acum greul.......fuck my life
+
+    #printare detalii - pt dev
+    cv2.imshow('Procesare', Lot[4])
+    # print('Locuri libere de parcare:',FreeParkingSpaces)
+    print(sts)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
