@@ -9,7 +9,7 @@ def nothing(x):
 
 # importare video
 camera = cv2.VideoCapture("parking_test2.mp4")
-q
+
 # definire trackbars + valorile max & min
 cv2.namedWindow("Trackbars")
 cv2.createTrackbar("L – H", "Trackbars", 0, 179, nothing)

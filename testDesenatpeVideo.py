@@ -1,3 +1,5 @@
+from typing import List, Tuple
+
 import cv2
 import numpy as np
 from datetime import datetime
@@ -7,8 +9,9 @@ from openpyxl import Workbook
 from openpyxl.worksheet.table import Table, TableStyleInfo
 
 
+
 # initial points (before drawing) & other variables
-ParkingSpaces = []
+
 pt1 = (0, 0)
 pt2 = (0, 0)
 topLeft_clicked = False
@@ -19,7 +22,7 @@ Start = True
 # stocare fiecare frame selectat
 Lot = [''] * 25
 NumberingLots = [''] * 25
-
+MaskedFrame = ['']*25
 contours = [''] * 25
 hierarchy = [''] * 25
 
@@ -42,10 +45,15 @@ tpPointsChoose = []
 drawing = False
 tempFlag = False
 
+
 firstFrame = True
 Lot = [''] * 25
 ParkingSpaces = []
 Points = []
+FirstFramePoint = [''] * 25
+SecondFramePoint = [''] * 25
+ParkingSpaces = [''] * 25
+varTest = [''] * 25
 
 def GetData():
     while True:
@@ -110,8 +118,6 @@ def GetData():
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
          break
-
-
 
 def draw_ROI(event, x, y, flags, param):
     global point1, tpPointsChoose,pts,drawing, tempFlag, Points
@@ -196,19 +202,64 @@ while True:
 
     #filtru aplicat cu succes - iterativ
     for i in range(len(Points)):
+
         mask = np.zeros(frame.shape, dtype=np.uint8)
         roi_corners = np.array([Points[i]], dtype=np.int32)
         white = (255, 255, 255)
         cv2.fillPoly(mask, roi_corners, white)
-        Lot[i] = cv2.bitwise_and(frame, mask)
+
+        #stocare locatii masini din 4 puncte + masca negru adaugata peste excese intr-un singur frame pt procesare
+        MaskedFrame[i] = cv2.bitwise_and(frame, mask)
+
+
 
     #acum greul.......fuck my life
+    #asignare puncte inceput
+    #ceva ciudat se intampla aici..
+    for a in range(len(Points)):
+        FirstFramePoint[a] = Points[a][1]
+        SecondFramePoint[a] = Points[a][2]
+        ParkingSpaces[a] = FirstFramePoint[a] + SecondFramePoint[a]
+
+
+    #TypeError: list indices must be integers or slices, not tuple
+    for v in range(len(varTest)):
+        Lot[v] = MaskedFrame[varTest[v][1]:varTest[v][3], varTest[v][0]:varTest[v][2]]
+
+    #cv2.imshow('test', Lot[0])
+
+    # #verificare axa x si y colt stanga sus - primul punct pt frame nou
+    # for i in range(len(Points)):
+    #     if FirstFramePoint[i] < Points[i][1]:
+    #         FirstFramePoint[i] = Points[i][1]
+    #
+    #     if FirstFramePoint[i] > Points[i][1]:
+    #         FirstFramePoint[i] = Points[i][1]
+    #
+    # # verificare axa x si y colt drepta jos - al 2lea punct pt frame nou
+    # for i in range(len(Points)):
+    #     if SecondFramePoint[i] < Points[i][3]:
+    #         SecondFramePoint[i] = Points[i][3]
+    #
+    #     if SecondFramePoint[i] > Points[i][3]:
+    #         SecondFramePoint[i] = Points[i][3]
+
+
+
+
+    #(123, 145), (86, 346), (509, 394), (585, 125)
+    #FirstFramePoint = (123, 145)(509, 394)
+    #SecondFramePoint(509, 394)
+
+    # de la x asta pana la x alalalt, de la y asta pana la y alalalt
+    #ParkingSpaces[i][1]: ParkingSpaces[i][3], ParkingSpaces[i][0]: ParkingSpaces[i][2]
+
+
+
 
     #printare detalii - pt dev
-    cv2.imshow('Procesare', Lot[4])
     # print('Locuri libere de parcare:',FreeParkingSpaces)
-    print(sts)
-
+    # print(sts)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
