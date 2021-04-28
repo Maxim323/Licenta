@@ -3,37 +3,21 @@
 # dupa selectare locuri parcare pe care le doresti sa fie monitorizate apasa "c"
 # apasa "q" cand vrei sa inchizi programul
 
+import time
+from datetime import datetime
+
 import cv2
 import numpy as np
-from datetime import datetime
-import time
 from openpyxl import Workbook
 from openpyxl.worksheet.table import Table, TableStyleInfo
-
-# initial points (before drawing) & other variables
-pt1 = (0, 0)
-pt2 = (0, 0)
-topLeft_clicked = False
-bottomRight_clicked = False
-firstFrame = True
-Start = True
 
 # stocare fiecare frame selectat
 Lot = [''] * 25
 NumberingLots = [''] * 25
-MaskedFrame = ['']*25
-
-contours = [''] * 25
-hierarchy = [''] * 25
-
-# nr conture pt fiecare zona selectata
-area = [''] * 25
+MaskedFrame = [''] * 25
 
 # OCUPAT / LIBER pt fiecare loc de parcare selectat
-sts = ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']
-
-# conture pentru fiecare loc de parcare selectat
-cnt = [''] * 25
+sts = [''] * 25
 
 # lista pt stocare valori de pixeli albi pt fiecare loc de paracare individual
 WhitePixels = [''] * 25
@@ -44,30 +28,19 @@ ParkedHour = [''] * 25
 tpPointsChoose = []
 drawing = False
 tempFlag = False
-
-
 firstFrame = True
-Lot = [''] * 25
-ParkingSpaces = []
 Points = []
-FirstFramePoint = [''] * 25
-SecondFramePoint = [''] * 25
 ParkingSpaces = [''] * 25
-varTest = [''] * 25
 
-def GetData():
+
+def getData():
     while True:
 
         BusyParkingSpaces = 0
-        TrueRange = 0
 
         for h in range(len(sts)):
             if sts[h] == "OCUPAT":
                 BusyParkingSpaces = BusyParkingSpaces + 1
-
-        for g in range(len(sts)):
-            if sts[h] == "LIBER" or sts[h] == "OCUPAT":
-                TrueRange = TrueRange + 1
 
         TotalParkingSpaces = int(len(sts))
         FreeParkingSpaces = TotalParkingSpaces - BusyParkingSpaces
@@ -94,6 +67,7 @@ def GetData():
             sheet["D" + str(m + 2)] = BusyParkingSpaces
             sheet["E" + str(m + 2)] = FreeParkingSpaces
 
+
         # creating a table
         tab = Table(displayName="Table1", ref="A1:E" + str(len(ParkingSpaces) + 1))
 
@@ -113,22 +87,22 @@ def GetData():
         # printare tranfer cu succes
         print("Data transfer done")
 
-        #scriere in fisier odata la 10sec
+        # scriere in fisier odata la 10sec
         time.sleep(10)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
-         break
+            break
+
 
 def draw_ROI(event, x, y, flags, param):
-    global point1, tpPointsChoose,pts,drawing, tempFlag, Points
+    global point1, tpPointsChoose, pts, drawing, tempFlag, Points
 
-
-    #desenare puncte cu click stanga
+    # desenare puncte cu click stanga
     if event == cv2.EVENT_LBUTTONDOWN:
         tempFlag = True
         drawing = False
         point1 = (x, y)
-        tpPointsChoose.append((x, y))  # Used to draw points
+        tpPointsChoose.append((x, y))
 
     # salvare puncte si inchidere forma cu click dreapta
     if event == cv2.EVENT_RBUTTONDOWN:
@@ -153,20 +127,18 @@ now = datetime.now()
 # current time are full data format pt procesare date
 current_time = now.strftime("%m-%d-%Y %H:%M:%S")
 
-
-#detalii ititializare click event + fisier
+# detalii ititializare click event + fisier
 cv2.namedWindow('Selectare locuri parcare')
-cv2.setMouseCallback('Selectare locuri parcare',draw_ROI)
-
+cv2.setMouseCallback('Selectare locuri parcare', draw_ROI)
 
 cap = cv2.VideoCapture('testing.mp4')
 
 # Delayed playback, adjusted according to computing power
-fps=cap.get(cv2.CAP_PROP_FPS)
-size=(cap.get(cv2.CAP_PROP_FRAME_WIDTH),cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+fps = cap.get(cv2.CAP_PROP_FPS)
+size = (cap.get(cv2.CAP_PROP_FRAME_WIDTH), cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-print("fps: {}\nsize: {}".format(fps,size))
-vfps = 0.7/fps
+print("fps: {}\nsize: {}".format(fps, size))
+vfps = 0.7 / fps
 
 while True:
     # capture frame-by-frame
@@ -193,20 +165,19 @@ while True:
     while firstFrame is True:
         cv2.imshow('Selectare locuri parcare', frame)
 
-        #Mouse click - stanga
-        if (tempFlag == True and drawing == False) :
+        # Mouse click - stanga
+        if (tempFlag == True and drawing == False):
 
-            #desenare cerc dupa prima apasare a primului punct
+            # desenare cerc dupa prima apasare a primului punct
             cv2.circle(frame, point1, 5, (0, 255, 0), 2)
 
-            #deneaza linie de la punctul anterior pana la cel apasat curent
+            # deneaza linie de la punctul anterior pana la cel apasat curent
             for i in range(len(tpPointsChoose) - 1):
                 cv2.line(frame, tpPointsChoose[i], tpPointsChoose[i + 1], (255, 0, 0), 2)
 
         # Mouse click - dreapta
         if (tempFlag == True and drawing == True):
-
-            #creare polyline cu coordonatele acumulate in [pts] + inchidere forma cu primul punct
+            # creare polyline cu coordonatele acumulate in [pts] + inchidere forma cu primul punct
             cv2.polylines(frame, [pts], True, (0, 0, 255), thickness=2)
 
         # Middle mouse button - stergere + creare linie goale, pts devine 0
@@ -214,21 +185,19 @@ while True:
             for i in range(len(tpPointsChoose) - 1):
                 cv2.line(frame, tpPointsChoose[i], tpPointsChoose[i + 1], (0, 0, 255), 2)
 
-
         if cv2.waitKey(1) & 0xFF == ord('c'):
             firstFrame = False
             cv2.destroyWindow('Selectare locuri parcare')
             break
 
-    #filtru aplicat cu succes - iterativ
+    # filtru aplicat cu succes - iterativ
     for i in range(len(Points)):
-
         mask = np.zeros(FinalFrame.shape, dtype=np.uint8)
         roi_corners = np.array([Points[i]], dtype=np.int32)
         white = (255, 255, 255)
         cv2.fillPoly(mask, roi_corners, white)
 
-        #stocare locatii masini din 4 puncte + masca negru adaugata peste excese intr-un singur frame pt procesare
+        # stocare locatii masini din 4 puncte + masca negru adaugata peste excese intr-un singur frame pt procesare
         MaskedFrame[i] = cv2.bitwise_and(FinalFrame, mask)
 
         WhitePixels[i] = cv2.countNonZero(MaskedFrame[i])
@@ -248,7 +217,6 @@ while True:
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
-
 
 cap.release()
 cv2.destroyAllWindows()
