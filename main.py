@@ -131,8 +131,8 @@ current_time = now.strftime("%m-%d-%Y %H:%M:%S")
 cv2.namedWindow('Selectare locuri parcare')
 cv2.setMouseCallback('Selectare locuri parcare', draw_ROI)
 
-cap = cv2.VideoCapture('testing.mp4')
-
+# cap = cv2.VideoCapture('testing.mp4')
+cap = cv2.VideoCapture('C:/Users/edidi/Downloads/Video/testing2.mp4')
 # Delayed playback, adjusted according to computing power
 fps = cap.get(cv2.CAP_PROP_FPS)
 size = (cap.get(cv2.CAP_PROP_FRAME_WIDTH), cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -159,8 +159,12 @@ while True:
     # canny cu frame-ul rezultat din dilatare
     edge = cv2.Canny(dilation, lowerThreshold, upperThreshold)
 
+    # Otsu's thresholding after Gaussian filtering
+    blur = cv2.GaussianBlur(edge, (3, 3), 0)
+    ret, Otsu = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
     # conversie catre frame binar dupa canny pt accuracy mai mare
-    _, FinalFrame = cv2.threshold(edge, 80, 255, cv2.THRESH_BINARY)
+    _, FinalFrame = cv2.threshold(Otsu, 125, 255, cv2.THRESH_BINARY)
 
     while firstFrame is True:
         cv2.imshow('Selectare locuri parcare', frame)
@@ -212,8 +216,11 @@ while True:
                 sts[i] = "LIBER"
                 ParkedHour[i] = 0
 
-    cv2.imshow('test1', FinalFrame)
-    print(sts)
+
+    cv2.imshow('Filter 1', dilation)
+    cv2.imshow('Filter 2', edge)
+    cv2.imshow('Filter 3', FinalFrame)
+    cv2.imshow('Filter 4', Otsu)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
