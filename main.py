@@ -131,8 +131,9 @@ current_time = now.strftime("%m-%d-%Y %H:%M:%S")
 cv2.namedWindow('Selectare locuri parcare')
 cv2.setMouseCallback('Selectare locuri parcare', draw_ROI)
 
-# cap = cv2.VideoCapture('testing.mp4')
-cap = cv2.VideoCapture('C:/Users/edidi/Downloads/Video/testing2.mp4')
+cap = cv2.VideoCapture('testing.mp4')
+# cap = cv2.VideoCapture('C:/Users/a1/Downloads/VideoLicenta/testing2.mp4')
+
 # Delayed playback, adjusted according to computing power
 fps = cap.get(cv2.CAP_PROP_FPS)
 size = (cap.get(cv2.CAP_PROP_FRAME_WIDTH), cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -145,7 +146,7 @@ while True:
     ret, frame = cap.read()
 
     # autocanny
-    sigma = 0.3
+    sigma = 0.33
     median = np.median(frame)
     lowerThreshold = int(max(0, (1.0 - sigma) * median))
     upperThreshold = int(min(255, (1.0 + sigma) * median))
@@ -158,7 +159,7 @@ while True:
 
     # canny cu frame-ul rezultat din dilatare
     edge = cv2.Canny(dilation, lowerThreshold, upperThreshold)
-
+    edgetest = cv2.Canny(frame, lowerThreshold, upperThreshold)
     # Otsu's thresholding after Gaussian filtering
     blur = cv2.GaussianBlur(edge, (3, 3), 0)
     ret, Otsu = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
@@ -217,13 +218,53 @@ while True:
                 ParkedHour[i] = 0
 
 
-    cv2.imshow('Filter 1', dilation)
-    cv2.imshow('Filter 2', edge)
-    cv2.imshow('Filter 3', FinalFrame)
-    cv2.imshow('Filter 4', Otsu)
+    cv2.imshow('Canny pe frame filtrat', edge)
+    cv2.imshow('Canny pe frame nefiltrat', edgetest)
+    # cv2.imshow('Filter 3', FinalFrame)
+    # cv2.imshow('Filter 4', Otsu)
+    #cv2.imshow('Live camera', frame)
+    #print(kernel)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
 cap.release()
 cv2.destroyAllWindows()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
