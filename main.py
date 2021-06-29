@@ -159,13 +159,14 @@ while True:
 
     # canny cu frame-ul rezultat din dilatare
     edge = cv2.Canny(dilation, lowerThreshold, upperThreshold)
-    edgetest = cv2.Canny(frame, lowerThreshold, upperThreshold)
+
+
     # Otsu's thresholding after Gaussian filtering
     blur = cv2.GaussianBlur(edge, (3, 3), 0)
-    ret, Otsu = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    ret, Otsu = cv2.threshold(blur, 80, 255, cv2.THRESH_OTSU)
 
     # conversie catre frame binar dupa canny pt accuracy mai mare
-    _, FinalFrame = cv2.threshold(Otsu, 125, 255, cv2.THRESH_BINARY)
+    _, FinalFrame = cv2.threshold(Otsu, 50, 255, cv2.THRESH_BINARY)
 
     while firstFrame is True:
         cv2.imshow('Selectare locuri parcare', frame)
@@ -218,12 +219,14 @@ while True:
                 ParkedHour[i] = 0
 
 
-    cv2.imshow('Canny pe frame filtrat', edge)
-    cv2.imshow('Canny pe frame nefiltrat', edgetest)
-    # cv2.imshow('Filter 3', FinalFrame)
-    # cv2.imshow('Filter 4', Otsu)
+    #cv2.imshow('Canny pe frame filtrat', edge)
+    #cv2.imshow('Canny pe frame nefiltrat', edgetest)
+
+    cv2.imshow('Masked lot', MaskedFrame[0])
     #cv2.imshow('Live camera', frame)
-    #print(kernel)
+
+
+    print(sts)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
